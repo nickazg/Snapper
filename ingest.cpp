@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
+#include <math.h>
 
 // INFO about file found at 
 // https://wiki.openstreetmap.org/wiki/SL2
@@ -23,6 +24,7 @@ int EXTA_INFO_POSITION = 100;
 int TIME_POSITION = 140;
 
 double POLAR_EARTH_RADIUS = 6356752.3142;
+double RAD_CONVERSION = 180/M_PI;
 
 // Gets uint8 at specific position in byte stream
 uint8_t getUint8(std::ifstream& stream, int position, int way, bool readonly=false){
@@ -145,6 +147,16 @@ float getFloat(std::ifstream& stream, int position, int way, bool readonly=false
 //     outCSV << "Heading" << "\n";
 // }
 
+double toLongitude(uint32_t mercator) {
+    return mercator/POLAR_EARTH_RADIUS * RAD_CONVERSION;
+}
+
+double toLatitude(uint32_t mercator) {
+    double temp = mercator/POLAR_EARTH_RADIUS;
+    temp = exp(temp);
+    temp = (2*atan(temp))-(M_PI/2);
+    return temp * RAD_CONVERSION;			
+}
 int readFile(const char *inPath, const char *outPath){
     
     // Print the input file 
@@ -156,8 +168,8 @@ int readFile(const char *inPath, const char *outPath){
     outCSV.open(outPath);
     
     // CSV Header
-    outCSV << "latEnc" << ",";
-    outCSV << "lngEnc" << ",";
+    outCSV << "lat" << ",";
+    outCSV << "long" << ",";
     outCSV << "waterDepth" << ",";
     outCSV << "speedGps" << ",";
     outCSV << "temperature" << ",";
@@ -265,6 +277,8 @@ int readFile(const char *inPath, const char *outPath){
         in.seekg(144, std::ios_base::cur);
         in.seekg(packetSize, std::ios_base::cur); 
 
+        double lat = toLatitude(lngEnc);
+        double lng = toLongitude(lngEnc);
 
         // PRINTING      
         // std::cout << "lat: " << latEnc << " long: " << lngEnc;
@@ -278,8 +292,8 @@ int readFile(const char *inPath, const char *outPath){
 
         
         // STREAM CSV
-        outCSV << latEnc << ",";
-        outCSV << lngEnc << ",";
+        outCSV << lat << ",";
+        outCSV << lng << ",";
         outCSV << waterDepth << ",";
         outCSV << speedGps << ",";
         outCSV << temperature << ",";
