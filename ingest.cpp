@@ -28,8 +28,8 @@ double POLAR_EARTH_RADIUS = 6356752.3142;
 double RAD_CONVERSION = 180/M_PI;
 
 // Gets uint8 at specific position in byte stream
-uint8_t getUint8(std::ifstream& stream, int position, int way, bool readonly=false){
-    uint8_t output;
+int8_t getInt8(std::ifstream& stream, int position, int way, bool readonly=false){
+    int8_t output;
     if (!readonly){
         switch (way)
         {
@@ -56,8 +56,8 @@ uint8_t getUint8(std::ifstream& stream, int position, int way, bool readonly=fal
 }
 
 // Gets uint16 at specific position in byte stream
-uint16_t getUint16(std::ifstream& stream, int position, int way, bool readonly=false){
-    uint16_t output;
+int16_t getInt16(std::ifstream& stream, int position, int way, bool readonly=false){
+    int16_t output;
     if (!readonly){
         switch (way)
         {
@@ -84,8 +84,8 @@ uint16_t getUint16(std::ifstream& stream, int position, int way, bool readonly=f
 }
 
 // Gets uint32 at specific position in byte stream
-uint32_t getUint32(std::ifstream& stream, int position, int way, bool readonly=false){
-    uint32_t output;
+int32_t getInt32(std::ifstream& stream, int position, int way, bool readonly=false){
+    int32_t output;
     if (!readonly){
         switch (way)
         {
@@ -148,11 +148,11 @@ float getFloat(std::ifstream& stream, int position, int way, bool readonly=false
 //     outCSV << "Heading" << "\n";
 // }
 
-double toLongitude(uint32_t easting) {
+double toLongitude(int32_t easting) {
     return easting / POLAR_EARTH_RADIUS * RAD_CONVERSION;
 }
 
-double toLatitude(uint32_t northing) {    
+double toLatitude(int32_t northing) {    
     double temp = northing/POLAR_EARTH_RADIUS;    
     temp = exp(temp);
     temp = (2 * atan(temp)) - (M_PI / 2);
@@ -202,14 +202,14 @@ int readFile(const char *inPath, const char *outPath){
     in.open(inPath, std::ifstream::in | std::ios::binary); // open file as binary
     
     // FORMAT
-    uint16_t format = getUint16(in, FORMAT_POSITION, 0);    
+    int16_t format = getInt16(in, FORMAT_POSITION, 0);    
     // Fails if not the correct format
     if (format != 2) {
         return 1;
     }
     
     // BLOCKSIZE
-    uint16_t blockSize = getUint16(in, BLOCKSIZE_POSITION, 0);
+    int16_t blockSize = getInt16(in, BLOCKSIZE_POSITION, 0);
     // Fails if not the correct block size
     if (blockSize != 3200 && blockSize != 1970){
         return 1;
@@ -224,15 +224,15 @@ int readFile(const char *inPath, const char *outPath){
 
         // CHANNEL
         in.seekg(streamPos);
-        uint16_t channel = getUint16(in, CHANNEL_POSITION, 1);
+        int16_t channel = getInt16(in, CHANNEL_POSITION, 1);
 
         // PACKET SIZE
         in.seekg(streamPos);
-        uint16_t packetSize = getUint16(in, PACKET_SIZE_POSITION, 1);
+        int16_t packetSize = getInt16(in, PACKET_SIZE_POSITION, 1);
 
         // FRAME INDEX
         in.seekg(streamPos);
-        uint16_t frameIndex = getUint16(in, INDEX_POSITION, 1);
+        int16_t frameIndex = getInt16(in, INDEX_POSITION, 1);
 
         // LIMITS
         in.seekg(streamPos);
@@ -241,7 +241,7 @@ int readFile(const char *inPath, const char *outPath){
 
         // FREQ
         in.seekg(streamPos);
-        uint8_t freq = getUint8(in, FREQ_POSITION, 1);
+        int8_t freq = getInt8(in, FREQ_POSITION, 1);
 
         // DEPTHS
         in.seekg(streamPos);
@@ -253,8 +253,8 @@ int readFile(const char *inPath, const char *outPath){
         std::bitset<16> flags;
         float speedGps = getFloat(in, EXTA_INFO_POSITION, 1);
         float temperature = getFloat(in, EXTA_INFO_POSITION, 1, true);
-        uint32_t lngEnc = getUint32(in, EXTA_INFO_POSITION, 1, true);
-        uint32_t latEnc = getUint32(in, EXTA_INFO_POSITION, 1, true);
+        int32_t lngEnc = getInt32(in, EXTA_INFO_POSITION, 1, true);
+        int32_t latEnc = getInt32(in, EXTA_INFO_POSITION, 1, true);
         float speedWater = getFloat(in, EXTA_INFO_POSITION, 1, true);
         float track = getFloat(in, EXTA_INFO_POSITION, 1, true);
         float altitude = getFloat(in, EXTA_INFO_POSITION, 1, true);
@@ -272,7 +272,7 @@ int readFile(const char *inPath, const char *outPath){
 
         // TIME OFFSET
         in.seekg(streamPos);
-        uint32_t timeOffset = getUint32(in, TIME_POSITION, 1);
+        int32_t timeOffset = getInt32(in, TIME_POSITION, 1);
 
         // END OF PACKET
         in.seekg(streamPos); 
