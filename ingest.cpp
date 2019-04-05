@@ -2,6 +2,7 @@
 #include <fstream>
 #include <bitset>
 #include <math.h>
+#include <limits>
 
 // INFO about file found at 
 // https://wiki.openstreetmap.org/wiki/SL2
@@ -147,14 +148,14 @@ float getFloat(std::ifstream& stream, int position, int way, bool readonly=false
 //     outCSV << "Heading" << "\n";
 // }
 
-double toLongitude(uint32_t mercator) {
-    return mercator/POLAR_EARTH_RADIUS * RAD_CONVERSION;
+double toLongitude(uint32_t easting) {
+    return easting / POLAR_EARTH_RADIUS * RAD_CONVERSION;
 }
 
-double toLatitude(uint32_t mercator) {
-    double temp = mercator/POLAR_EARTH_RADIUS;
+double toLatitude(uint32_t northing) {    
+    double temp = northing/POLAR_EARTH_RADIUS;    
     temp = exp(temp);
-    temp = (2*atan(temp))-(M_PI/2);
+    temp = (2 * atan(temp)) - (M_PI / 2);
     return temp * RAD_CONVERSION;			
 }
 int readFile(const char *inPath, const char *outPath){
@@ -166,6 +167,7 @@ int readFile(const char *inPath, const char *outPath){
     // Write to CSV
     std::ofstream outCSV;
     outCSV.open(outPath);
+    outCSV.precision(17);
     
     // CSV Header
     outCSV << "lat" << ",";
@@ -277,7 +279,7 @@ int readFile(const char *inPath, const char *outPath){
         in.seekg(144, std::ios_base::cur);
         in.seekg(packetSize, std::ios_base::cur); 
 
-        double lat = toLatitude(lngEnc);
+        double lat = toLatitude(latEnc);
         double lng = toLongitude(lngEnc);
 
         // PRINTING      
